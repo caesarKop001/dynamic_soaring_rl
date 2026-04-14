@@ -4,104 +4,814 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Learning step-level dynamic soaring in shear flow</title>
+  <meta
+    name="description"
+    content="Project page for Learning step-level dynamic soaring in shear flow. Dynamic soaring emerges from step-level state-feedback control using only local sensing, without explicit cycle-level planning."
+  />
+
   <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --surface-2: #f4f6f8;
+      --text: #1d1f23;
+      --muted: #5d6470;
+      --line: #e3e7ec;
+      --accent: #0b57d0;
+      --accent-soft: #eaf2ff;
+      --maxw: 1080px;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 20px;
-      line-height: 1.6;
-      color: #222;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
     }
-    h1, h2 {
-      color: #111;
-    }
-    .authors, .links {
-      margin: 12px 0;
-    }
-    .video, .figure {
-      margin: 24px 0;
-      text-align: center;
-    }
-    img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-    }
-    iframe {
-      max-width: 100%;
-      border: none;
-      border-radius: 8px;
-    }
-    .box {
-      background: #f7f7f7;
-      padding: 18px;
-      border-radius: 10px;
-      margin: 20px 0;
-    }
+
     a {
-      color: #0b57d0;
+      color: var(--accent);
       text-decoration: none;
     }
+
     a:hover {
       text-decoration: underline;
     }
-    hr {
-      margin: 32px 0;
+
+    .container {
+      width: min(var(--maxw), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      background: rgba(250, 250, 250, 0.88);
+      border-bottom: 1px solid rgba(227, 231, 236, 0.85);
+    }
+
+    .topbar-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      min-height: 62px;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 0.98rem;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: flex-end;
+      font-size: 0.95rem;
+    }
+
+    .hero {
+      padding: 56px 0 28px;
+    }
+
+    .hero-card {
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 34px 30px 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(2rem, 4.8vw, 3.25rem);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 1.08rem;
+      max-width: 920px;
+    }
+
+    .authors {
+      margin: 16px 0 10px;
+      font-size: 1rem;
+    }
+
+    .authors sup {
+      font-size: 0.72em;
+    }
+
+    .affiliations {
+      color: var(--muted);
+      font-size: 0.96rem;
+      margin-bottom: 16px;
+    }
+
+    .contact {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .link-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 600;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      text-decoration: none;
+      border-color: #cfd6de;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    section {
+      padding: 18px 0 6px;
+    }
+
+    .section-header {
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 1.6rem;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .section-desc {
+      margin: 0;
+      color: var(--muted);
+      max-width: 900px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px 22px 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 1.08rem;
+      line-height: 1.3;
+    }
+
+    .card p {
+      margin: 0;
+      color: #2d3137;
+    }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: #fcfdff;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+    }
+
+    .callout strong {
+      color: var(--text);
+    }
+
+    .question {
+      font-size: 1.06rem;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .abstract-box {
+      font-size: 1rem;
+    }
+
+    .abstract-box strong {
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .analogy-box {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .video-group {
+      margin-bottom: 12px;
+    }
+
+    .video-group-title {
+      margin: 22px 0 8px;
+      font-size: 1.18rem;
+      letter-spacing: -0.01em;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .video-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #0d1117;
+    }
+
+    .video-body {
+      padding: 16px 18px 18px;
+    }
+
+    .video-title {
+      margin: 0 0 6px;
+      font-size: 1.04rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .video-meta {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .video-desc {
+      margin: 0;
+      color: #2d3137;
+      font-size: 0.97rem;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: #3c434c;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid var(--line);
+    }
+
+    .figure-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .figure-card img {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .figure-caption {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+
+    .bibtex {
+      background: #11161c;
+      color: #f6f8fa;
+      border-radius: 16px;
+      padding: 20px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      border: 1px solid #1f2933;
+    }
+
+    footer {
+      padding: 36px 0 48px;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2,
+      .grid-3,
+      .video-grid,
+      .figure-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card {
+        padding: 28px 20px 22px;
+      }
+
+      .topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 10px 0;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
     }
   </style>
 </head>
 <body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">Dynamic Soaring Project Page</div>
+      <nav class="nav">
+        <a href="#overview">Overview</a>
+        <a href="#question">Core Question</a>
+        <a href="#videos">Videos</a>
+        <a href="#findings">Findings</a>
+        <a href="#paper">Paper</a>
+        <a href="#citation">Citation</a>
+      </nav>
+    </div>
+  </header>
 
-  <h1>Learning step-level dynamic soaring in shear flow</h1>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-card">
+          <div class="eyebrow">Project Page</div>
+          <h1>Learning step-level dynamic soaring in shear flow</h1>
+          <p class="subtitle">
+            Dynamic soaring is commonly described at the level of complete cycles. Here, we show that
+            efficient long-range navigation in shear flow can instead emerge from <strong>step-level,
+            state-feedback control</strong> using only <strong>local sensing</strong>, without explicit
+            cycle-level planning.
+          </p>
 
-  <div class="authors">
-    <strong>Authors:</strong> Your Name, Coauthor A, Coauthor B
-  </div>
+          <div class="authors">
+            Lunbing Chen<sup>1</sup>, Jixin Lu<sup>1</sup>, Yufei Yin<sup>1</sup>, Jinpeng Huang<sup>1</sup>,
+            Yang Xiang<sup>1,*</sup>, and Hong Liu<sup>1,†</sup>
+          </div>
+          <div class="affiliations">
+            <sup>1</sup>J.C. Wu Center for Aerodynamics, School of Aeronautics and Astronautics,
+            Shanghai Jiao Tong University, Shanghai 200240, PR China
+          </div>
+          <div class="contact">
+            * Lead Contact:
+            <a href="mailto:xiangyang@sjtu.edu.cn">xiangyang@sjtu.edu.cn</a>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            † Corresponding Author:
+            <a href="mailto:hongliu@sjtu.edu.cn">hongliu@sjtu.edu.cn</a>
+          </div>
 
-  <div class="links">
-    <a href="https://arxiv.org/abs/XXXX.XXXXX" target="_blank">[arXiv]</a>
-    <a href="https://github.com/yourname/your-repo" target="_blank">[Code]</a>
-    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank">[Video]</a>
-  </div>
+          <div class="link-row">
+            <a class="button primary" href="paper.pdf" target="_blank" rel="noopener">Paper PDF</a>
+            <a class="button" href="#videos">Representative Videos</a>
+            <a class="button" href="https://github.com/your-repo-here" target="_blank" rel="noopener">Code</a>
+            <a class="button" href="https://arxiv.org/abs/XXXX.XXXXX" target="_blank" rel="noopener">arXiv</a>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <div class="box">
-    <strong>Abstract.</strong>
-    We study dynamic soaring as a closed-loop navigation problem in vertically sheared wind.
-    A reinforcement learning agent learns an emergent two-phase strategy consisting of dynamic soaring followed by targeted glide,
-    achieving robust goal-directed flight across varying wind conditions.
-  </div>
+    <section id="overview">
+      <div class="container">
+        <div class="section-header">
+          <h2>Overview</h2>
+          <p class="section-desc">
+            Dynamic soaring enables sustained flight by harvesting energy from wind shear. In traditional
+            descriptions, this behavior is interpreted through complete soaring cycles. In realistic
+            environments, however, wind fields are variable and locally changing, making it unclear
+            whether successful navigation truly requires explicit cycle-level planning.
+          </p>
+        </div>
 
-  <h2>Video</h2>
-  <div class="video">
-    <iframe width="800" height="450"
-      src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
-      allowfullscreen>
-    </iframe>
-  </div>
+        <div class="grid-2">
+          <div class="card abstract-box">
+            <strong>Abstract</strong>
+            <p>
+              Dynamic soaring enables sustained flight by extracting energy from wind shear, yet it is
+              commonly understood as a cycle-level maneuver that assumes stable flow conditions. In
+              realistic unsteady environments, however, such assumptions are often violated, raising the
+              question of whether explicit cycle-level planning is necessary. Here, we show that dynamic
+              soaring can emerge from step-level, state-feedback control using only local sensing, without
+              explicit trajectory planning. Using deep reinforcement learning as a tool, we obtain policies
+              that achieve robust omnidirectional navigation across diverse shear-flow conditions. The
+              learned behavior organizes into a structured control law that coordinates turning and vertical
+              motion, giving rise to a two-phase strategy governed by a trade-off between energy extraction
+              and directional progress. The resulting policy generalizes across varying conditions and
+              reproduces key features observed in biological flight and optimal-control solutions. These
+              findings identify a feedback-based control structure underlying dynamic soaring, demonstrating
+              that efficient energy-harvesting flight can emerge from local interactions with the flow
+              without explicit planning, and providing insights for biological flight and autonomous systems
+              in complex, flow-coupled environments.
+            </p>
+          </div>
 
-  <h2>Key Results</h2>
-  <div class="figure">
-    <img src="fig1.png" alt="Main figure">
-    <p>Figure 1. Overview of the problem setting and learned strategy.</p>
-  </div>
+          <div class="card">
+            <h3>Main claim</h3>
+            <p>
+              Dynamic soaring <strong>does not require explicit cycle-level planning</strong>. Instead,
+              robust long-range navigation can emerge from <strong>step-level feedback</strong> based only
+              on local observations of the current flight state and local wind condition.
+            </p>
+            <div class="tag-row">
+              <span class="tag">Step-level feedback</span>
+              <span class="tag">Local sensing</span>
+              <span class="tag">No explicit planning</span>
+              <span class="tag">Omnidirectional navigation</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <div class="figure">
-    <img src="fig2.png" alt="Generalization figure">
-    <p>Figure 2. Generalization under varying wind fields.</p>
-  </div>
+    <section id="question">
+      <div class="container">
+        <div class="section-header">
+          <h2>Core question</h2>
+          <p class="section-desc">
+            The paper is organized around a control question rather than a trajectory-generation question.
+          </p>
+        </div>
 
-  <hr>
+        <div class="card callout">
+          <p class="question">
+            <strong>Is explicit cycle-level global planning necessary for dynamic soaring, or can sustained
+            energy extraction and navigation emerge from step-level feedback based solely on local sensing?</strong>
+          </p>
+        </div>
 
-  <h2>BibTeX</h2>
-  <pre>
-@article{chen2026dynamicsoaring,
-  title={Learning Dynamic Soaring as a Closed-loop Navigation Strategy in Wind Shear},
-  author={Chen, ...},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
-  year={2026}
-}
-  </pre>
+        <div class="grid-2" style="margin-top: 18px;">
+          <div class="card">
+            <h3>Why this question matters</h3>
+            <p>
+              Existing descriptions of dynamic soaring are often built around complete maneuvers between
+              wind layers. Such formulations implicitly assume that the flow remains stable over the
+              duration of each maneuver. In realistic near-surface environments, however, wind conditions
+              can vary on spatial and temporal scales comparable to a single maneuver, making future flow
+              conditions difficult to predict over extended horizons.
+            </p>
+          </div>
 
+          <div class="card analogy-box">
+            <h3>Intuition: planning versus feedback</h3>
+            <p>
+              A useful analogy is driving in a changing traffic environment. Although a route can be planned
+              in advance, real-world driving rarely follows a fixed trajectory: traffic flow, obstacles, or
+              road closures require continuous adjustment of control actions based on local information.
+              Dynamic soaring operates under a similar principle. When local flow conditions vary, effective
+              behavior must adapt at the level of instantaneous decisions rather than simply executing a
+              precomputed cycle.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="videos">
+      <div class="container">
+        <div class="section-header">
+          <h2>Representative videos</h2>
+          <p class="section-desc">
+            The videos below show both the baseline navigation behavior and several out-of-distribution
+            generalization tests. Replace the paths with your final video files before deployment.
+          </p>
+        </div>
+
+        <div class="video-group">
+          <div class="video-group-title">A. Baseline navigation across wind-relative directions</div>
+          <div class="video-grid">
+            <article class="video-card">
+              <video controls preload="metadata" poster="assets/posters/video_1_1.jpg">
+                <source src="videos/video_1_1.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              <div class="video-body">
+                <h3 class="video-title">Video 1. Crosswind navigation</h3>
+                <p class="video-meta">
+                  Corresponds to Figure 1A condition &nbsp;|&nbsp;
+                  <code>&psi;<sub>t</sub> = 90&deg;</code>,
+                  <code>w<sub>ref</sub> = 10.0 m/s</code>,
+                  <code>&delta; = 0.55 m</code>
+                </p>
+                <p class="video-desc">
+                  Representative crosswind flight showing sustained dynamic soaring followed by
+                  target-directed motion. This case highlights the canonical zig-zag trajectory and the
+                  emergence of long-range navigation from local feedback.
+                </p>
+              </div>
+            </article>
+
+            <article class="video-card">
+              <video controls preload="metadata" poster="assets/posters/video_1_2.jpg">
+                <source src="videos/video_1_2.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              <div class="video-body">
+                <h3 class="video-title">Video 2. Tailwind navigation</h3>
+                <p class="video-meta">
+                  Corresponds to Supplementary Figure S2 (A–D) condition &nbsp;|&nbsp;
+                  <code>&psi;<sub>t</sub> = 0&deg;</code>,
+                  <code>w<sub>ref</sub> = 10.0 m/s</code>,
+                  <code>&delta; = 0.55 m</code>
+                </p>
+                <p class="video-desc">
+                  Tailwind case illustrating how the learned policy transitions earlier toward directed
+                  glide when the wind assists progress toward the target.
+                </p>
+              </div>
+            </article>
+
+            <article class="video-card">
+              <video controls preload="metadata" poster="assets/posters/video_1_3.jpg">
+                <source src="videos/video_1_3.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              <div class="video-body">
+                <h3 class="video-title">Video 3. Headwind navigation</h3>
+                <p class="video-meta">
+                  Corresponds to Supplementary Figure S2 (E–H) condition &nbsp;|&nbsp;
+                  <code>&psi;<sub>t</sub> = 180&deg;</code>,
+                  <code>w<sub>ref</sub> = 10.0 m/s</code>,
+                  <code>&delta; = 0.55 m</code>
+                </p>
+                <p class="video-desc">
+                  Headwind case showing that the policy remains effective even when directional progress
+                  is most challenging, revealing robust omnidirectional navigation.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="video-group">
+          <div class="video-group-title">B. Generalization to varying environments</div>
+          <div class="video-grid">
+            <article class="video-card">
+              <video controls preload="metadata" poster="assets/posters/video_2_1.jpg">
+                <source src="videos/video_2_1.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              <div class="video-body">
+                <h3 class="video-title">Video 4. Generalization to varying wind direction</h3>
+                <p class="video-meta">
+                  Corresponds to Figure 4A &nbsp;|&nbsp; Generalization test: spatially varying wind field
+                </p>
+                <p class="video-desc">
+                  Although the policy is trained in uniform wind fields, it adapts successfully to spatially
+                  varying wind direction. This supports the interpretation that the controller exploits local
+                  flow information rather than memorizing a fixed trajectory.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="video-group">
+          <div class="video-group-title">C. Generalization to moving targets</div>
+          <div class="video-grid">
+            <article class="video-card">
+              <video controls preload="metadata" poster="assets/posters/video_3_1.jpg">
+                <source src="videos/video_3_1.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              <div class="video-body">
+                <h3 class="video-title">Video 5. Moving target capture (success)</h3>
+                <p class="video-meta">
+                  Corresponds to Supplementary Figure S4 (E–H) &nbsp;|&nbsp; Generalization test
+                </p>
+                <p class="video-desc">
+                  Successful interception of a moving target. The controller adapts online to the changing
+                  navigation objective while maintaining energy-harvesting flight.
+                </p>
+              </div>
+            </article>
+
+            <article class="video-card">
+              <video controls preload="metadata" poster="assets/posters/video_3_2.jpg">
+                <source src="videos/video_3_2.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              <div class="video-body">
+                <h3 class="video-title">Video 6. Moving target capture (timeout)</h3>
+                <p class="video-meta">
+                  Corresponds to Supplementary Figure S4 (I–L) &nbsp;|&nbsp; Generalization test
+                </p>
+                <p class="video-desc">
+                  A challenging moving-target case leading to timeout rather than crash. This example is
+                  useful because it shows the boundary of performance and illustrates how failure can arise
+                  from task difficulty while the underlying energy-harvesting behavior remains intact.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="findings">
+      <div class="container">
+        <div class="section-header">
+          <h2>Key findings</h2>
+          <p class="section-desc">
+            The learned policy is not simply a successful controller. It reveals an interpretable feedback
+            structure underlying dynamic soaring.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <h3>1. Dynamic soaring emerges without explicit planning</h3>
+            <p>
+              The learned policy demonstrates that sustained energy extraction and long-range navigation
+              can emerge from step-level, state-feedback control using only local sensing, rather than
+              from explicit cycle-level planning.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>2. Behavior organizes into a two-phase strategy</h3>
+            <p>
+              At the behavioral level, trajectories organize into a dynamic soaring phase followed by a
+              target-directed gliding phase, governed by a trade-off between energy extraction and
+              directional progress.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>3. Control organizes into a structured law</h3>
+            <p>
+              At the control level, coordinated modulation of bank angle and lift coefficient governs
+              horizontal turning and vertical motion, revealing a structured feedback law grounded in the
+              local wind-relative state.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 18px;">
+          <div class="card">
+            <h3>Wind-relative sensing is sufficient</h3>
+            <p>
+              Observation ablations show that a compact wind-relative representation is sufficient for
+              robust control, while geocentric or less structured sensory representations degrade learning
+              and transfer.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Generalization supports a feedback interpretation</h3>
+            <p>
+              The policy generalizes to spatially varying winds, moving targets, and noisy observations,
+              suggesting that the learned behavior reflects a reusable feedback strategy rather than a
+              condition-specific trajectory.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="paper">
+      <div class="container">
+        <div class="section-header">
+          <h2>Paper assets</h2>
+          <p class="section-desc">
+            Add your final figures and links here. The image filenames below are placeholders and can be
+            replaced with your exported PNG or JPEG figures.
+          </p>
+        </div>
+
+        <div class="figure-grid">
+          <div class="card figure-card">
+            <img src="assets/figures/fig1_overview.png" alt="Overview figure of the dynamic soaring problem formulation and RL framework" />
+            <div class="figure-caption">
+              <strong>Figure 1.</strong> Problem formulation and deep reinforcement learning framework for
+              autonomous dynamic soaring. This figure introduces the task, the glider model, the wind
+              profile, and the success-rate maps across target directions and wind conditions.
+            </div>
+          </div>
+
+          <div class="card figure-card">
+            <img src="assets/figures/fig4_generalization.png" alt="Generalization figure under varying wind fields and navigation conditions" />
+            <div class="figure-caption">
+              <strong>Figure 4.</strong> Robustness and generalization under out-of-distribution conditions,
+              including spatially varying winds, altered navigation tasks, and observation noise.
+            </div>
+          </div>
+        </div>
+
+        <div class="link-row" style="margin-top: 18px;">
+          <a class="button primary" href="paper.pdf" target="_blank" rel="noopener">Download Paper</a>
+          <a class="button" href="supplementary.pdf" target="_blank" rel="noopener">Supplementary PDF</a>
+          <a class="button" href="https://github.com/your-repo-here" target="_blank" rel="noopener">Source Code</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="citation">
+      <div class="container">
+        <div class="section-header">
+          <h2>Citation</h2>
+          <p class="section-desc">
+            Update the venue, DOI, and URLs once the manuscript status is finalized.
+          </p>
+        </div>
+
+        <pre class="bibtex">@article{chen2026steplevelds,
+  title   = {Learning step-level dynamic soaring in shear flow},
+  author  = {Chen, Lunbing and Lu, Jixin and Yin, Yufei and Huang, Jinpeng and Xiang, Yang and Liu, Hong},
+  journal = {arXiv preprint arXiv:XXXX.XXXXX},
+  year    = {2026}
+}</pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      This page presents the central question, representative behaviors, and main findings of
+      <em>Learning step-level dynamic soaring in shear flow</em>. For questions, please contact
+      <a href="mailto:xiangyang@sjtu.edu.cn">xiangyang@sjtu.edu.cn</a>
+      or
+      <a href="mailto:hongliu@sjtu.edu.cn">hongliu@sjtu.edu.cn</a>.
+    </div>
+  </footer>
 </body>
 </html>
